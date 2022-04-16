@@ -5,3 +5,4 @@ share/
 structureArchive/
 downloadSentinel_processing.ipynb
 uploadAGOL.ipynb
+settings.py
