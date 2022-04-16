@@ -4,11 +4,11 @@ def init():
     global OAHlogin, OAHpassword, ARClogin, ARCpassword, startDate, endDate, oblast, indexes, HOMEdir, DATAdir, RESULTSdir, SHAREdir, REPROJdir, cloudCover
     
     # credentials - Open Access Hub
-    OAHlogin = 'zuluzi'
-    OAHpassword = 'kom987ik'
+    OAHlogin = ''
+    OAHpassword = ''
     # credentials ArcGIS Pro
-    ARClogin = "zuluzi"
-    ARCpassword = "Jem987dzem!"
+    ARClogin = ""
+    ARCpassword = ""
 
     # dates to search for new Sentinel images 
     # e.g. '20211025' 'rrrrMMdd'
