@@ -20,6 +20,8 @@ import fiona
 
 import json
 
+import settings as st
+
 def vci(product, B04, B08, histNDVI):
     """
     Calculates VCI index.
@@ -35,7 +37,7 @@ def vci(product, B04, B08, histNDVI):
     B04[B04 <= 0] = np.nan
     B08[B08 <= 0] = np.nan
     
-# ndvi matrix is required for calculating vci 
+# ndvi matrix is required for calculating vci
     try:
         ndvi = rasterio.open(histNDVI).read().astype('f4')
         ndviMax = np.nanmax(ndvi)
@@ -58,11 +60,14 @@ def vci(product, B04, B08, histNDVI):
         count=1,
         compress='lzw')
 
-    os.chdir(RESULTSdir)
-    with rasterio.open('VCI_' + product + '.tif', 'w', **kwargs) as dst:
+    os.chdir(st.RESULTSdir)
+    name = st.oblast + "VCI_"
+    if list(st.indexes.keys())[0].endswith("hist"):
+        name = st.oblast + "VCIhist_"
+    with rasterio.open(name + product + '.tif', 'w', **kwargs) as dst:
         dst.write(vci.astype(rasterio.float32))
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
     
 ### --------------------------------------------------------------------------------------------------------------------------------------------
 def ndwi(product, B03, B08):
@@ -94,11 +99,14 @@ def ndwi(product, B03, B08):
         count=1,
         compress='lzw')
 
-    os.chdir(RESULTSdir)
-    with rasterio.open('NDWI_' + product + '.tif', 'w', **kwargs) as dst:
+    os.chdir(st.RESULTSdir)
+    name = st.oblast + "NDWI_"
+    if list(st.indexes.keys())[0].endswith("hist"):
+        name = st.oblast + "NDWIhist_"
+    with rasterio.open(name + product + '.tif', 'w', **kwargs) as dst:
         dst.write(ndwi.astype(rasterio.float32))
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
 ### --------------------------------------------------------------------------------------------------------------------------------------------
 def nmdi(product, B08, B11, B12):
     """
@@ -146,11 +154,14 @@ def nmdi(product, B08, B11, B12):
         count=1,
         compress='lzw')
 
-    os.chdir(RESULTSdir)
-    with rasterio.open('NMDI_' + product + '.tif', 'w', **kwargs) as dst:
+    os.chdir(st.RESULTSdir)
+    name = st.oblast + "NMDI_"
+    if list(st.indexes.keys())[0].endswith("hist"):
+        name = st.oblast + "NMDIhist_"
+    with rasterio.open(name + product + '.tif', 'w', **kwargs) as dst:
         dst.write(nmdi.astype(rasterio.float32))
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
 ### --------------------------------------------------------------------------------------------------------------------------------------------
 def ndmi(product, B08, B11):
     """
@@ -193,11 +204,14 @@ def ndmi(product, B08, B11):
         count=1,
         compress='lzw')
 
-    os.chdir(RESULTSdir)
-    with rasterio.open('NDMI_' + product + '.tif', 'w', **kwargs) as dst:
+    os.chdir(st.RESULTSdir)
+    name = st.oblast + "NDMI_"
+    if list(st.indexes.keys())[0].endswith("hist"):
+        name = st.oblast + "NDMIhist_"
+    with rasterio.open(name + product + '.tif', 'w', **kwargs) as dst:
         dst.write(ndmi.astype(rasterio.float32))
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
 ### --------------------------------------------------------------------------------------------------------------------------------------------
 def ndvi(product, B04, B08):
     """
@@ -228,11 +242,14 @@ def ndvi(product, B04, B08):
         count=1,
         compress='lzw')
 
-    os.chdir(RESULTSdir)
-    with rasterio.open('NDVI_' + product + '.tif', 'w', **kwargs) as dst:
+    os.chdir(st.RESULTSdir)
+    name = st.oblast + "NDVI_"
+    if list(st.indexes.keys())[0].endswith("hist"):
+        name = st.oblast + "NDVIhist_"
+    with rasterio.open(name + product + '.tif', 'w', **kwargs) as dst:
         dst.write(ndvi.astype(rasterio.float32))
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
 ### --------------------------------------------------------------------------------------------------------------------------------------------
 def wdrvi(product, B04, B08):
     """
@@ -263,11 +280,14 @@ def wdrvi(product, B04, B08):
         count=1,
         compress='lzw')
 
-    os.chdir(RESULTSdir)
-    with rasterio.open('WDRVI_' + product + '.tif', 'w', **kwargs) as dst:
+    os.chdir(st.RESULTSdir)
+    name = st.oblast + "WDRVI_"
+    if list(st.indexes.keys())[0].endswith("hist"):
+        name = st.oblast + "WDRVIhist_"
+    with rasterio.open(name + product + '.tif', 'w', **kwargs) as dst:
         dst.write(wdrvi.astype(rasterio.float32))
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
 ### --------------------------------------------------------------------------------------------------------------------------------------------
 def evi(product, B02, B04, B08):
     """
@@ -286,7 +306,7 @@ def evi(product, B02, B04, B08):
     B08[B08 <= 0] = np.nan
     B02[B02 <= 0] = np.nan
     
-    evi = np.divide((B08 - B04), (B08 + 6*B04 - 7.5*B02 +1)) * 2.5
+    evi = np.divide((B08 - B04), (B08 + (6*B04) - (7.5*B02) + 1 )) * 2.5
 
     # evi[evi < 0] = np.nan
     # evi[evi > 100] = np.nan
@@ -300,8 +320,11 @@ def evi(product, B02, B04, B08):
         count=1,
         compress='lzw')
 
-    os.chdir(RESULTSdir)
-    with rasterio.open('EVI_' + product + '.tif', 'w', **kwargs) as dst:
+    os.chdir(st.RESULTSdir)
+    name = st.oblast + "EVI_"
+    if list(st.indexes.keys())[0].endswith("hist"):
+        name = st.oblast + "EVIhist_"
+    with rasterio.open(name + product + '.tif', 'w', **kwargs) as dst:
         dst.write(evi.astype(rasterio.float32))
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)

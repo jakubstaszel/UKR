@@ -20,39 +20,26 @@ import fiona
 
 import json
 
-# dates to search for new Sentinel images 
-# e.g. '20211025' 'rrrrMMdd'
-startDate = '20210401' # included 
-endDate = '20210430' # not included
+from manage import bands2A, updateStructure, dataCheck2A, dataDownload2A, epsg3857, mergeWQindexes, masking
+from droughtIndexes import vci, ndvi, evi, wdrvi
 
-# you need to specify if the data will be actual or historical 
-# so the indexes do not merge together
-oblast = 'kk'
-indexes = {oblast + 'EVIhist':[],oblast + 'NDVIhist':[],oblast + 'VCIhist':[],oblast + 'WDRVIhist':[]}
-# indexes = {oblast + 'EVI':[],oblast + 'NDVI':[],oblast + 'VCI':[],oblast + 'WDRVI':[]}
-
-HOMEdir = os.getcwd()
-DATAdir = HOMEdir + r'\data'
-RESULTSdir = HOMEdir + r'\results'
-SHAREdir = HOMEdir + r'\share'
-REPROJdir = HOMEdir + r'\reproject'
-
-cloudCover = (0,20)
+import settings as st
 
 def main():
+    st.init()
+    
     # detecting if we are calculating hist data 
     # then working on every product folder in DATAdir
-    if list(indexes.keys())[0].endswith("hist"):
-        for file in os.listdir(DATAdir):
+    if list(st.indexes.keys())[0].endswith("hist"):
+        for file in os.listdir(st.DATAdir):
             if not file.endswith(".zip"):
                 bands = bands2A(file)
                 
-                vci(file, bands['b04_10m'], bands['b08_10m'], SHAREdir + '\\' + oblast + 'NDVIhist_merged_masked.tif')
                 ndvi(file, bands['b04_10m'], bands['b08_10m'])
                 evi(file, bands['b02_10m'], bands['b04_10m'], bands['b08_10m'])
                 wdrvi(file, bands['b04_10m'], bands['b08_10m'])
 
-                updateStructure(product[1]['title'], bands['b03_10m'], lastRefresh)
+                #updateStructure(file, bands['b03_10m'], lastRefresh)
                 
     # working on products from Open Access Hub
     else:
@@ -62,8 +49,8 @@ def main():
         # downloading data
         lastRefresh = dt.datetime.now()
         if not products.empty:
-            for product in products.iterrows():
-                dataDownload2A(product)
+            #for product in products.iterrows():
+            dataDownload2A(products)
         fileRefresh = open('lastRefresh.txt','w')
         fileRefresh.write(str(lastRefresh))
         fileRefresh.close()
@@ -74,7 +61,7 @@ def main():
                 bands = bands2A(product[1]['filename'])
                 #showBand(bands['b02_10m'],'viridis')        
         # drought indexes
-                vci(product[1]['title'], bands['b04_10m'], bands['b08_10m'], SHAREdir + '\\' + oblast + 'NDVIhist_merged_masked.tif')
+                vci(product[1]['title'], bands['b04_10m'], bands['b08_10m'], st.SHAREdir + '\\' + st.oblast + 'NDVIhist_merged_masked.tif')
                 ndvi(product[1]['title'], bands['b04_10m'], bands['b08_10m'])
                 evi(product[1]['title'], bands['b02_10m'], bands['b04_10m'], bands['b08_10m'])
                 wdrvi(product[1]['title'], bands['b04_10m'], bands['b08_10m'])
@@ -83,9 +70,9 @@ def main():
 
     print('Reprojecting indexes in RESULTSdir to EPSG:3857 and saving to REPROJdir')
     print('    Also removing files in RESULTSdir')
-    for file in os.listdir(RESULTSdir):
+    for file in os.listdir(st.RESULTSdir):
         if file.endswith('.tif'):
-            epsg3857(file, RESULTSdir, True)
+            epsg3857(file, st.RESULTSdir, True)
 
 
     # from this part, indexes variable is needed to specify which indexes should be continued
@@ -93,29 +80,29 @@ def main():
     # indexes = {'VCI':[], 'NDWI':[], 'NMDI':[]}
     # indexes = {'NDMI':[], 'NDVI':[]}
 
-    for file in os.listdir(REPROJdir):
+    for file in os.listdir(st.REPROJdir):
         if file.endswith('.tif'):
             param = file.split('_')[0]
-            src = rasterio.open(REPROJdir + '\\' + file)
-            indexes[param].append(src)
-    mergeWQindexes(indexes, True)
+            src = rasterio.open(st.REPROJdir + '\\' + file)
+            st.indexes[param].append(src)
+    mergeWQindexes(st.indexes, True)
 
     # this is required to close all open files before deleting files in REPROJdir
     src.close()
-    for key in indexes:
-        for product in indexes[key]:
+    for key in st.indexes:
+        for product in st.indexes[key]:
             product.close()
 
     print('Removing files from REPROJdir')
-    for filename in os.listdir(REPROJdir):
-        if os.path.exists(REPROJdir + '\\' + filename):
-            os.remove(REPROJdir + '\\' + filename)
+    for filename in os.listdir(st.REPROJdir):
+        if os.path.exists(st.REPROJdir + '\\' + filename):
+            os.remove(st.REPROJdir + '\\' + filename)
             print('    Deleted: ' + filename)
 
-    for file in os.listdir(SHAREdir):
+    for file in os.listdir(st.SHAREdir):
         if file.endswith('_merged.tif'):
-            maskingShp = HOMEdir + "\\oblastExtent\\" + oblast + ".shp"
-            masking(file, SHAREdir, maskingShp)
+            maskingShp = st.HOMEdir + "\\oblastExtent\\" + st.oblast + ".shp"
+            masking(file, st.SHAREdir, maskingShp)
 
 if __name__ == "__main__":
     main()

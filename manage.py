@@ -20,6 +20,8 @@ import fiona
 
 import json
 
+import settings as st
+
 # code changed for dev environment in dataCheck2A
 def dataCheck2A():
     """
@@ -27,17 +29,17 @@ def dataCheck2A():
     Reguires lastRefresh.txt file in HOMEdir.
     Return dataframe with products found.
     """
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
 
-    api = SentinelAPI('zuluzi','kom987ik','https://scihub.copernicus.eu/dhus')
-    footprint = geojson_to_wkt(read_geojson(HOMEdir + '\\geojsonExtents\\' + oblast + '.geojson'))
+    api = SentinelAPI(st.OAHlogin,st.OAHpassword,'https://scihub.copernicus.eu/dhus')
+    footprint = geojson_to_wkt(read_geojson(st.HOMEdir + '\\geojsonExtents\\' + st.oblast + '.geojson'))
     products = api.query(footprint,
 # searching from last refresh date (saved in file) till now
                          #date=(dt.datetime.strptime(open('lastRefresh.txt','r').read(), '%Y-%m-%d %H:%M:%S.%f'), dt.datetime.now()),
-                         date=(startDate, endDate),
+                         date=(st.startDate, st.endDate),
                          platformname='Sentinel-2',
                          processinglevel = 'Level-2A',
-                         cloudcoverpercentage=cloudCover)
+                         cloudcoverpercentage=st.cloudCover)
 
     products_df = api.to_dataframe(products)
 
@@ -61,8 +63,8 @@ def dataDownload2A(products_df):
     Returns nothing.
     """
 
-    os.chdir(DATAdir)
-    api = SentinelAPI('zuluzi','kom987ik','https://scihub.copernicus.eu/dhus')
+    os.chdir(st.DATAdir)
+    api = SentinelAPI(st.OAHlogin,st.OAHpassword,'https://scihub.copernicus.eu/dhus')
 
     for product in products_df.iterrows():
     #product = products_df
@@ -73,14 +75,14 @@ def dataDownload2A(products_df):
             zip_ref.extractall()
             print("Zipped file extracted to", product[1]['filename'], "folder")
 
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
 def bands2A(product):
     """
     Gets directories to different bands of the 2A product.
     Returns dictionary with directories to the bands.
     """
 # getting into exact imagery folder
-    os.chdir(DATAdir + '/' + product)
+    os.chdir(st.DATAdir + '/' + product)
 
 # finding directories for needed bands (only used implemented)
     bands = {'b02_10m':None, 
@@ -112,7 +114,7 @@ def bands2A(product):
                 bands['b01_60m'] = os.path.join(root, file)
             if file.endswith("_B03_60m.jp2"):
                 bands['b03_60m'] = os.path.join(root, file)
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
     return bands
 def showBand(bandDir, color_map='gray'):
     """
@@ -145,7 +147,7 @@ def epsg3857(product, directory, delete = False):
             'height': height
         })
 
-        with rasterio.open(REPROJdir + '\\' + product + '_reprojected.tif' , 'w', **kwargs) as dst:
+        with rasterio.open(st.REPROJdir + '\\' + product + '_reprojected.tif' , 'w', **kwargs) as dst:
             for i in range(1, src.count + 1):
                 reproject(
                     source=rasterio.band(src, i),
@@ -168,7 +170,7 @@ def mergeWQindexes(toBeMerged, delete = False):
         rasters = []
         print('Merging : ' + index)
         rasters.extend(toBeMerged[index])
-        if exists(SHAREdir + '\\' + index + '_merged.tif'):
+        if exists(st.SHAREdir + '\\' + index + '_merged.tif'):
             previousMerge = rasterio.open(SHAREdir + '\\' + index + '_merged.tif')
             rasters.append(previousMerge)
         mosaic, out_trans = merge(rasters)
@@ -182,7 +184,7 @@ def mergeWQindexes(toBeMerged, delete = False):
             dtype=rasterio.float32,
             count=1,
             compress='lzw')
-        with rasterio.open(SHAREdir+'\\'+index+'_merged.tif', 'w', **kwargs) as dest:
+        with rasterio.open(st.SHAREdir+'\\'+index+'_merged.tif', 'w', **kwargs) as dest:
             dest.write(mosaic)
     
     src.close()
@@ -196,7 +198,7 @@ def mergeWQindexes(toBeMerged, delete = False):
 def updateStructure(product, band, lastRefresh):
     """
     """
-    os.chdir(HOMEdir)
+    os.chdir(st.HOMEdir)
     with open('structure.json', 'r') as json_file:
         structure = json.load(json_file)
     structure['lastRefresh'] = str(lastRefresh)
@@ -217,7 +219,7 @@ def updateStructure(product, band, lastRefresh):
     with open('structure.json', 'w') as json_out:
         json.dump(structure, json_out)
 
-    with open(HOMEdir + '\\structureArchive\\structure_' + str(dt.datetime.today().strftime('%Y%m%d')) + '.json', 'w') as json_out:
+    with open(st.HOMEdir + '\\structureArchive\\structure_' + str(dt.datetime.today().strftime('%Y%m%d')) + '.json', 'w') as json_out:
         json.dump(structure, json_out)
 def masking(product, directory, maskingShp):
     """

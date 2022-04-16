@@ -20,6 +20,8 @@ import fiona
 
 import json
 
+import settings
+
 def cdom(product, B03, B04):
     """
     Calculates CDOM index.
