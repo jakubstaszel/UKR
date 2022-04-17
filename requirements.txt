@@ -1,0 +1,9 @@
+sentinelsat==1.1.0
+rasterio==1.1.0
+matplotlib==3.4.3
+numpy==1.20.1
+fiona==1.8.13.post1
+json5==0.9.5
+arcgis==1.9.1
+arcpy==2.9
+lxml==4.6.3
