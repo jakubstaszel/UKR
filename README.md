@@ -19,6 +19,6 @@ This code can be used in 2 configurations:
 2) Configure ArcGIS Pro project:
     - Open ArcGIS Pro project in share directory
     - Change raster files for yours
-    - Change names of layers and maps (every index needs own map with only one raster layer, both same names - [oblast][index]hist e.g. kkNDVIhist or kkNDVI)
+    - Change names of layers and maps (every index needs own map with only one raster layer, both with the same name - <oblast><index>hist e.g. kkNDVIhist or kkNDVI)
     - Modify symbolization
 3) Run the project by **python main.py --upload**
