@@ -3,6 +3,7 @@ This code can be used in 2 configurations:
 - calculatng indexes for historical data - manually add folders with satellite images to **data** folder
 - calculating indexes for actual data - automatic download of satellite images (it can be searched by specififed extent, cloud cover and start / end date)
 # Setup:
+## Processing data:
 1) Clone the repository and add manually 5 folders named **data**, **reproject**, **results**, **share** and **structureArchive**
 2) Go to **settings.py**, 
     - add your credentials, 
